@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { Router } from "express";
 import { z } from "zod";
 import { Comment } from "../models/Comment";
-import { authenticate, requireRole, type AuthedRequest } from "../middleware/auth";
+import { authenticate, requireRole, optionalAuthenticate, type AuthedRequest } from "../middleware/auth";
 import { dispatchNotification } from "../services/dispatch";
 import { recordAuditLog } from "../services/auditLog";
 
@@ -16,12 +16,24 @@ const ModerationInput = z.object({
   status: z.enum(["approved", "hidden", "deleted"]),
 });
 
-// GET /api/articles/:articleId/comments — public, only approved comments
-router.get("/articles/:articleId/comments", async (req: Request, res: Response) => {
+// GET /api/articles/:articleId/comments — public, only approved comments.
+// Uses optionalAuthenticate so we can flag which comments the current
+// viewer has liked (hasLiked) without requiring sign-in to read comments.
+router.get("/articles/:articleId/comments", optionalAuthenticate, async (req: AuthedRequest, res: Response) => {
   const comments = await Comment.find({ article: req.params.articleId, status: "approved" })
     .populate("author", "name avatarUrl")
-    .sort({ createdAt: -1 });
-  res.json({ comments });
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const viewerId = req.user?._id ? String(req.user._id) : null;
+  const shaped = comments.map((c: any) => ({
+    ...c,
+    likes: c.likedBy?.length ?? c.likes ?? 0,
+    hasLiked: viewerId ? (c.likedBy ?? []).some((id: any) => String(id) === viewerId) : false,
+    likedBy: undefined, // don't leak the full liker list to the client
+  }));
+
+  res.json({ comments: shaped });
 });
 
 // POST /api/articles/:articleId/comments — any signed-in user
@@ -156,6 +168,27 @@ router.delete("/comments/:id", authenticate, async (req: AuthedRequest, res: Res
     meta: { article: String(comment.article), deletedBy: isOwner ? "author" : "moderator" },
   });
   res.json({ success: true });
+});
+
+// POST /api/comments/:id/like — toggle like for the signed-in user
+router.post("/comments/:id/like", authenticate, async (req: AuthedRequest, res: Response) => {
+  const comment = await Comment.findById(req.params.id);
+  if (!comment || comment.status === "deleted") {
+    return res.status(404).json({ error: "Comment not found" });
+  }
+
+  const userId = req.user!._id;
+  const alreadyLiked = comment.likedBy.some((id: any) => id.equals(userId));
+
+  if (alreadyLiked) {
+    comment.likedBy = comment.likedBy.filter((id: any) => !id.equals(userId)) as any;
+  } else {
+    comment.likedBy.push(userId as any);
+  }
+  comment.likes = comment.likedBy.length;
+  await comment.save();
+
+  res.json({ likes: comment.likes, hasLiked: !alreadyLiked });
 });
 
 export default router;

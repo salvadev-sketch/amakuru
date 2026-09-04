@@ -9,6 +9,7 @@ export interface IComment extends Document {
   content: string;
   status: CommentStatus;
   likes: number;
+  likedBy: Schema.Types.ObjectId[]; // ref User, tracks who liked (for toggle + "did I like this")
   moderatedBy?: Schema.Types.ObjectId; // ref User (Moderator/Admin who actioned it)
   moderatedAt?: Date;
   createdAt: Date;
@@ -28,6 +29,7 @@ const CommentSchema = new Schema<IComment>(
       index: true,
     },
     likes: { type: Number, default: 0 },
+    likedBy: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
     moderatedBy: { type: Schema.Types.ObjectId, ref: "User" },
     moderatedAt: { type: Date },
   },
