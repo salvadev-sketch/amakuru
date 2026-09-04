@@ -35,7 +35,7 @@ const ArticleUpdateInput = ArticleInput.partial();
 router.get("/", optionalAuthenticate, async (req: AuthedRequest, res: Response) => {
   const category = req.query.category as string | undefined;
   const tag = req.query.tag as string | undefined;
-  const search = req.query.search as string | undefined;
+  const search = (req.query.search as string | undefined)?.trim();
   const page = Math.max(1, parseInt((req.query.page as string) || "1", 10));
   const limit = Math.min(50, parseInt((req.query.limit as string) || "12", 10));
   const requestedStatus = req.query.status as string | undefined;
@@ -46,14 +46,21 @@ router.get("/", optionalAuthenticate, async (req: AuthedRequest, res: Response) 
   filter.status = isStaff && requestedStatus ? requestedStatus : "published";
   if (category) filter.category = category;
   if (tag) filter.tags = tag;
-  if (search) filter.title = { $regex: search, $options: "i" };
+  if (search) filter.$text = { $search: search };
+
+  // Full-text search ranks by relevance score; everything else falls back
+  // to newest-first like before.
+  const sort: Record<string, any> = search
+    ? { score: { $meta: "textScore" }, publishedAt: -1 }
+    : { publishedAt: -1, createdAt: -1 };
+  const projection = search ? { score: { $meta: "textScore" } } : undefined;
 
   const [articles, total] = await Promise.all([
-    Article.find(filter)
+    Article.find(filter, projection)
       .populate("category", "name slug colorDot")
       .populate("author", "name avatarUrl")
       .populate("coverImage", "url secureUrl altText")
-      .sort({ publishedAt: -1, createdAt: -1 })
+      .sort(sort)
       .skip((page - 1) * limit)
       .limit(limit),
     Article.countDocuments(filter),

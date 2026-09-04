@@ -13,6 +13,11 @@ export type LangKey =
   | "menu"
   | "closeMenu"
   | "tagline"
+  | "searchPlaceholder"
+  | "searchButton"
+  | "searchResultsFor"
+  | "searchNoResults"
+  | "searchLoading"
   // Homepage
   | "loadingFrontPage"
   | "backendErrorTitle"
@@ -73,6 +78,11 @@ export const translations: Record<"en" | "fr" | "rn", Record<LangKey, string>> =
     menu: "☰ Menu",
     closeMenu: "✕ Close",
     tagline: "Great Lakes region, in three voices",
+    searchPlaceholder: "Search articles…",
+    searchButton: "Search",
+    searchResultsFor: "Results for",
+    searchNoResults: "No articles matched your search.",
+    searchLoading: "Searching…",
 
     loadingFrontPage: "Loading the front page…",
     backendErrorTitle: "Couldn't reach the backend. Is it running?",
@@ -132,6 +142,11 @@ export const translations: Record<"en" | "fr" | "rn", Record<LangKey, string>> =
     menu: "☰ Menu",
     closeMenu: "✕ Fermer",
     tagline: "La région des Grands Lacs, en trois voix",
+    searchPlaceholder: "Rechercher des articles…",
+    searchButton: "Rechercher",
+    searchResultsFor: "Résultats pour",
+    searchNoResults: "Aucun article ne correspond à votre recherche.",
+    searchLoading: "Recherche en cours…",
 
     loadingFrontPage: "Chargement de la une…",
     backendErrorTitle: "Impossible de joindre le serveur. Est-il actif ?",
@@ -191,6 +206,11 @@ export const translations: Record<"en" | "fr" | "rn", Record<LangKey, string>> =
     menu: "☰ Menyu",
     closeMenu: "✕ Funga",
     tagline: "Akarere k'ibiyaga bigari, mu ndimi zitatu",
+    searchPlaceholder: "Rondera ivyanditswe…",
+    searchButton: "Rondera",
+    searchResultsFor: "Ivyavuye ku",
+    searchNoResults: "Nta kiganiro cabonetse gihuye n'ico urondera.",
+    searchLoading: "Kuronderwa…",
 
     loadingFrontPage: "Turimo gupakira urupapuro rw'imbere…",
     backendErrorTitle: "Ntitwashoboye kwungana na seriveri. Yoba iriko irakora?",

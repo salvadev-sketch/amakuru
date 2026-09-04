@@ -66,6 +66,12 @@ const ArticleSchema = new Schema<IArticle>(
 // Common query patterns: latest published articles per category, homepage feed
 ArticleSchema.index({ status: 1, publishedAt: -1 });
 ArticleSchema.index({ category: 1, status: 1, publishedAt: -1 });
+// Full-text search across headline, deck, and body — weighted so title
+// matches rank above dek matches, which rank above body matches.
+ArticleSchema.index(
+  { title: "text", dek: "text", body: "text" },
+  { weights: { title: 10, dek: 5, body: 1 }, name: "ArticleTextIndex" }
+);
 
 export const Article: Model<IArticle> =
   models.Article || model<IArticle>("Article", ArticleSchema);

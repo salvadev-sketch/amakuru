@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Search, X } from "lucide-react";
 import { useAuthUser } from "@/lib/hooks/useAuthUser";
 import AuthModal from "@/components/AuthModal";
 import LanguageSwitcher from "@/components/site/LanguageSwitcher";
@@ -29,8 +31,11 @@ function initials(name?: string | null) {
 export default function SiteHeader() {
   const { profile, loading } = useAuthUser();
   const { t } = useLanguage();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const today = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     year: "numeric",
@@ -39,6 +44,15 @@ export default function SiteHeader() {
   });
 
   const isSignedIn = !loading && !!profile;
+
+  function submitSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (!q) return;
+    setSearchOpen(false);
+    setMenuOpen(false);
+    router.push(`/search?q=${encodeURIComponent(q)}`);
+  }
 
   return (
     <>
@@ -70,7 +84,34 @@ export default function SiteHeader() {
           <span className="font-display text-[32px] italic font-semibold sm:text-[38px]">Amakuru</span>
         </Link>
 
-        <div className="hidden items-center sm:flex">
+        <div className="hidden items-center gap-3 sm:flex">
+          {searchOpen ? (
+            <form onSubmit={submitSearch} className="flex items-center gap-1.5">
+              <input
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t("searchPlaceholder")}
+                className="w-52 rounded border border-line bg-white px-3 py-1.5 text-sm text-ink outline-none focus:border-teal"
+              />
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                aria-label="Close search"
+                className="text-muted hover:text-ink"
+              >
+                <X size={18} />
+              </button>
+            </form>
+          ) : (
+            <button
+              onClick={() => setSearchOpen(true)}
+              aria-label={t("searchButton")}
+              className="text-charcoal hover:text-amber-deep"
+            >
+              <Search size={19} strokeWidth={2} />
+            </button>
+          )}
           <LanguageSwitcher />
         </div>
 
@@ -89,6 +130,16 @@ export default function SiteHeader() {
               {t(link.key)}
             </Link>
           ))}
+
+          <form onSubmit={submitSearch} className="flex w-full items-center gap-2 border-b border-line py-2.5 sm:hidden">
+            <Search size={16} className="shrink-0 text-muted" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t("searchPlaceholder")}
+              className="flex-1 bg-transparent text-sm text-ink outline-none"
+            />
+          </form>
 
           <div className="w-full border-b border-line py-2.5 sm:hidden">
             <LanguageSwitcher />
