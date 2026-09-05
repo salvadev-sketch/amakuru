@@ -42,6 +42,7 @@ export type LangKey =
   | "footerEthics"
   | "footerCareers"
   | "footerContact"
+  | "footerRss"
   | "footerCopyright"
   // Admin dashboard
   | "adminDashboard"
@@ -107,6 +108,7 @@ export const translations: Record<"en" | "fr" | "rn", Record<LangKey, string>> =
     footerEthics: "Newsroom ethics",
     footerCareers: "Careers",
     footerContact: "Contact",
+    footerRss: "RSS feed",
     footerCopyright: "Amakuru.",
 
     adminDashboard: "Admin dashboard",
@@ -171,6 +173,7 @@ export const translations: Record<"en" | "fr" | "rn", Record<LangKey, string>> =
     footerEthics: "Déontologie de la rédaction",
     footerCareers: "Carrières",
     footerContact: "Contact",
+    footerRss: "Flux RSS",
     footerCopyright: "Amakuru.",
 
     adminDashboard: "Tableau de bord admin",
@@ -235,6 +238,7 @@ export const translations: Record<"en" | "fr" | "rn", Record<LangKey, string>> =
     footerEthics: "Imyitwarire y'abanyamakuru",
     footerCareers: "Akazi",
     footerContact: "Twandikire",
+    footerRss: "Igikorwa RSS",
     footerCopyright: "Amakuru.",
 
     adminDashboard: "Ikibaho c'abakuru",

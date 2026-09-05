@@ -45,6 +45,7 @@ export default function SiteFooter() {
             <li><Link href="/ethics" className="text-[13px] text-charcoal hover:text-amber-deep">{t("footerEthics")}</Link></li>
             <li><Link href="/careers" className="text-[13px] text-charcoal hover:text-amber-deep">{t("footerCareers")}</Link></li>
             <li><Link href="/contact" className="text-[13px] text-charcoal hover:text-amber-deep">{t("footerContact")}</Link></li>
+            <li><a href="/feed.xml" className="text-[13px] text-charcoal hover:text-amber-deep">{t("footerRss")}</a></li>
           </ul>
         </div>
         <div>

@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   },
   description:
     "Independent news for the Great Lakes region, reported in English, French, and Kirundi.",
+  alternates: {
+    types: { "application/rss+xml": `${SITE_URL}/feed.xml` },
+  },
   openGraph: {
     type: "website",
     siteName: "Amakuru",
