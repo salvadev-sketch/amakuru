@@ -8,6 +8,7 @@ import SiteChrome from "@/components/site/SiteChrome";
 import BookmarkButton from "@/components/BookmarkButton";
 import ShareButtons from "@/components/ShareButtons";
 import CommentThread from "@/components/CommentThread";
+import RelatedArticles from "@/components/site/RelatedArticles";
 
 function formatDate(dateStr?: string) {
   if (!dateStr) return "";
@@ -122,6 +123,8 @@ export default function ArticleView({ slug }: { slug: string }) {
             ))}
           </div>
         )}
+
+        <RelatedArticles articleId={article._id} />
 
         <CommentThread articleId={article._id} />
       </article>

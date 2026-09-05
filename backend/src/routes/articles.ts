@@ -141,6 +141,62 @@ router.get("/:id", optionalAuthenticate, async (req: AuthedRequest, res: Respons
   res.json({ article });
 });
 
+// GET /api/articles/:id/related — public. Returns up to `limit` other
+// published articles: first ranked by tag overlap with this article,
+// then backfilled with same-category articles if there aren't enough
+// tag matches. :id may be an ObjectId or slug, same as GET /:id.
+router.get("/:id/related", async (req: Request, res: Response) => {
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(req.params.id);
+  const lookup = isObjectId ? { _id: req.params.id } : { slug: req.params.id };
+  const limit = Math.min(12, Math.max(1, parseInt((req.query.limit as string) || "4", 10)));
+
+  const current = await Article.findOne(lookup).select("_id category tags");
+  if (!current) {
+    return res.status(404).json({ error: "Article not found" });
+  }
+
+  const baseSelect = "title slug dek coverImage category author readTimeMinutes publishedAt createdAt views";
+  const basePopulate = [
+    { path: "category", select: "name slug colorDot" },
+    { path: "author", select: "name avatarUrl" },
+    { path: "coverImage", select: "url secureUrl altText" },
+  ];
+
+  const related: any[] = [];
+  const seenIds = new Set<string>([String(current._id)]);
+
+  if (current.tags && current.tags.length > 0) {
+    const byTag = await Article.find({
+      _id: { $nin: [...seenIds] },
+      status: "published",
+      tags: { $in: current.tags },
+    })
+      .select(baseSelect)
+      .populate(basePopulate)
+      .sort({ publishedAt: -1 })
+      .limit(limit);
+    for (const a of byTag) {
+      related.push(a);
+      seenIds.add(String(a._id));
+    }
+  }
+
+  if (related.length < limit && current.category) {
+    const byCategory = await Article.find({
+      _id: { $nin: [...seenIds] },
+      status: "published",
+      category: current.category,
+    })
+      .select(baseSelect)
+      .populate(basePopulate)
+      .sort({ publishedAt: -1 })
+      .limit(limit - related.length);
+    related.push(...byCategory);
+  }
+
+  res.json({ articles: related.slice(0, limit) });
+});
+
 // PATCH /api/articles/:id — Author can edit their own drafts; Editor/Admin can edit anything
 router.patch("/:id", requireRole("Admin", "Editor", "Author"), async (req: AuthedRequest, res: Response) => {
   const article = await Article.findById(req.params.id);
