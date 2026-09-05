@@ -3,9 +3,13 @@
 import { Mail, Twitter, Facebook, Instagram } from "lucide-react";
 import SiteChrome from "@/components/site/SiteChrome";
 import { useSiteSettings } from "@/lib/hooks/useSiteSettings";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { contactContent } from "@/lib/i18n/pageContent";
 
 export default function ContactPage() {
   const { settings } = useSiteSettings();
+  const { language } = useLanguage();
+  const c = contactContent[language];
   const email = settings?.contactEmail || "hello@amakuru.news";
   const social = settings?.socialLinks || {};
   const hasSocial = social.twitter || social.facebook || social.instagram;
@@ -14,15 +18,12 @@ export default function ContactPage() {
     <SiteChrome>
       <div className="mx-auto max-w-[760px] px-4 py-9 sm:px-8">
         <div className="mb-7 border-b-[3px] border-ink pb-4">
-          <span className="font-mono text-xs uppercase tracking-wide text-muted">Contact</span>
-          <h1 className="font-display text-[34px] font-semibold text-ink">Get in touch</h1>
+          <span className="font-mono text-xs uppercase tracking-wide text-muted">{c.label}</span>
+          <h1 className="font-display text-[34px] font-semibold text-ink">{c.heading}</h1>
         </div>
 
         <div className="space-y-6 text-[15px] leading-relaxed text-charcoal">
-          <p>
-            Story tips, corrections, feedback, or partnership questions — the newsroom reads
-            everything that comes in.
-          </p>
+          <p>{c.intro}</p>
 
           <a
             href={`mailto:${email}`}
@@ -34,7 +35,7 @@ export default function ContactPage() {
 
           {hasSocial && (
             <div>
-              <h2 className="mb-2 font-mono text-[11px] uppercase tracking-wide text-ink">Follow us</h2>
+              <h2 className="mb-2 font-mono text-[11px] uppercase tracking-wide text-ink">{c.followUs}</h2>
               <div className="flex items-center gap-2">
                 {social.twitter && (
                   <a
